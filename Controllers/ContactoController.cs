@@ -27,20 +27,6 @@ namespace Web2Hotel.Controllers
             return await _context.Contacto.ToListAsync();
         }
 
-        // GET: api/Contacto/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Contacto>> GetContacto(int id)
-        {
-            var contacto = await _context.Contacto.FindAsync(id);
-
-            if (contacto == null)
-            {
-                return NotFound();
-            }
-
-            return contacto;
-        }
-
         // PUT: api/Contacto/5
         [HttpPut("{id}")]
         public async Task<IActionResult> PutContacto(int id, Contacto contacto)

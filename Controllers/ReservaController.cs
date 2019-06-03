@@ -6,11 +6,14 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Web2Hotel.Models;
+using Web2Hotel.Dto;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Web2Hotel.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles="admin,client")]
     public class ReservaController : ControllerBase
     {
         private readonly Web2HotelContext _context;
@@ -25,20 +28,6 @@ namespace Web2Hotel.Controllers
         public async Task<ActionResult<IEnumerable<Reserva>>> GetReserva()
         {
             return await _context.Reserva.ToListAsync();
-        }
-
-        // GET: api/Reserva/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Reserva>> GetReserva(int id)
-        {
-            var reserva = await _context.Reserva.FindAsync(id);
-
-            if (reserva == null)
-            {
-                return NotFound();
-            }
-
-            return reserva;
         }
 
         // PUT: api/Reserva/5
@@ -73,12 +62,46 @@ namespace Web2Hotel.Controllers
 
         // POST: api/Reserva
         [HttpPost]
-        public async Task<ActionResult<Reserva>> PostReserva(Reserva reserva)
+        public async Task<ActionResult<Reserva>> PostReserva(ReservaDto reserva)
         {
-            _context.Reserva.Add(reserva);
-            await _context.SaveChangesAsync();
+            var userId = User.Identity.Name;
+            
+            if(reserva.FechaFin < reserva.FechaInicio){
+                return BadRequest("Fecha de Fin de reserva pasada a la de Inicio");
+            }
+            if(reserva.FechaInicio < DateTime.Now){
+                return BadRequest("No hacemos reservas en el pasado");
+            }
+            if(reserva.FechaInicio.AddDays(1).Date > reserva.FechaFin.Date){
+                return BadRequest("La reserva debe durar al menos un dia");
+            }
+            if(reserva.FechaFin > DateTime.Now.AddYears(1)){
+                return BadRequest("No hacemos reservas en un año");
+            }
+            foreach(int id in reserva.Habitaciones)
+            {
+                try{
+                    var f = new Reserva();
+                    f.FechaInicio = reserva.FechaInicio;
+                    f.FechaFin = reserva.FechaFin;
+                    f.Estado = "Activa";
+                    f.CreationDate = DateTime.Now;
+                    f.UsuarioId = reserva.UsusarioId;
+                    f.HabitacionId = id;
+                    try{
+                        f.CreationId = int.Parse(userId); 
+                    }catch(Exception e){
+                        f.CreationId = 0; 
+                    }
+                    _context.Reserva.Add(f);
+                }catch(Exception e){
+                    return BadRequest(e);
+                }
+                
+            }
 
-            return CreatedAtAction("GetReserva", new { id = reserva.Id }, reserva);
+            await _context.SaveChangesAsync();
+            return Ok();
         }
 
         // DELETE: api/Reserva/5
@@ -103,3 +126,12 @@ namespace Web2Hotel.Controllers
         }
     }
 }
+
+
+/*
+
+Reserva Dto
+duration
+habitationId 
+
+ */

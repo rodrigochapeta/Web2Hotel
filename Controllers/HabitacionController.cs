@@ -6,11 +6,13 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Web2Hotel.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Web2Hotel.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/[controller]/[action]")]
     [ApiController]
+    [Authorize(Roles="admin,client")]
     public class HabitacionController : ControllerBase
     {
         private readonly Web2HotelContext _context;
@@ -20,25 +22,32 @@ namespace Web2Hotel.Controllers
             _context = context;
         }
 
+        /// <summary>
+        /// Se manda un Datetime de fecha de inicio de reserva y int de Cantidad de dias de la reserva
+        /// Vuelve lista de habitaciones libres en esas fechas.
+        /// </summary>
+        /// <param name="fechaInicio"></param>
+        /// <param name="duracion"></param>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Habitacion>>> GetHabitacionesLibres(DateTime fechaInicio,DateTime fechaFin)
+        {
+             /// <summary>
+            /// Condicion de una habitacion libre:
+            ///     No tiene reservas entre fecha inicio y fecha fin
+            /// </summary>
+            var habitacionesLibres = 
+            _context.Habitacion
+                .Where(x=> x.Reserva.All(y => y.FechaInicio > fechaFin || y.FechaFin < fechaInicio))
+                .ToList();
+            return habitacionesLibres;
+        }
+
         // GET: api/Habitacion
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Habitacion>>> GetHabitacion()
         {
             return await _context.Habitacion.ToListAsync();
-        }
-
-        // GET: api/Habitacion/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Habitacion>> GetHabitacion(int id)
-        {
-            var habitacion = await _context.Habitacion.FindAsync(id);
-
-            if (habitacion == null)
-            {
-                return NotFound();
-            }
-
-            return habitacion;
         }
 
         // PUT: api/Habitacion/5

@@ -56,6 +56,7 @@ namespace Web2Hotel
                     IssuerSigningKey = new SymmetricSecurityKey(signingKey)
                 };
             });
+            
             services.AddTransient<AccountService>(); 
             services.AddDbContext<Web2HotelContext>(optionsBuilder =>
                 optionsBuilder.UseMySql(Configuration.GetConnectionString("Web2Hotel")));
@@ -67,8 +68,24 @@ namespace Web2Hotel
             
             services.AddSwaggerGen(c =>
             {  
-                c.SwaggerDoc("v1", new Info { Title = "My API", Version = "v1" });
+                c.SchemaRegistryOptions.CustomTypeMappings
+                    .Add(typeof(Microsoft.AspNetCore.Http.IFormFile), 
+                    () => new Swashbuckle.AspNetCore.Swagger.Schema() { Type = "file", Format = "binary"});
+                var security = new Dictionary<string, IEnumerable<string>>
+                {
+                    {"Bearer", new string[] { }},
+                };
+                c.SwaggerDoc("v1", new Swashbuckle.AspNetCore.Swagger.Info { Title = "Hotel Api", Version = "v1" });
+                c.AddSecurityDefinition("Bearer", new Swashbuckle.AspNetCore.Swagger.ApiKeyScheme
+                {
+                    Description = "Standard Authorization header using the Bearer scheme. Example: \"bearer {token}\"",
+                    In = "header",
+                    Name = "Authorization",
+                    Type = "apiKey"
+                });     
+                c.AddSecurityRequirement(security);
             });
+
 
             services.Configure<ForwardedHeadersOptions>(options =>
             {

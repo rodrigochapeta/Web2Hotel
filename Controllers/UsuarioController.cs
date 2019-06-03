@@ -6,11 +6,12 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Web2Hotel.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Web2Hotel.Controllers
 {
     [Route("api/[controller]")]
-    [ApiController]
+    [ApiController] 
     public class UsuarioController : ControllerBase
     {
         private readonly Web2HotelContext _context;
@@ -25,20 +26,6 @@ namespace Web2Hotel.Controllers
         public async Task<ActionResult<IEnumerable<Usuario>>> GetUsuario()
         {
             return await _context.Usuario.ToListAsync();
-        }
-
-        // GET: api/Usuario/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Usuario>> GetUsuario(int id)
-        {
-            var usuario = await _context.Usuario.FindAsync(id);
-
-            if (usuario == null)
-            {
-                return NotFound();
-            }
-
-            return usuario;
         }
 
         // PUT: api/Usuario/5

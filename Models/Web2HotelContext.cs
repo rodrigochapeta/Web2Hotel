@@ -88,13 +88,13 @@ namespace Web2Hotel.Models
 
                 entity.Property(e => e.CreationId).HasColumnType("int(11)");
 
-                entity.Property(e => e.Duracion).HasColumnType("int(11)");
-
                 entity.Property(e => e.Estado)
                     .IsRequired()
                     .HasColumnType("varchar(45)");
 
-                entity.Property(e => e.Fecha).HasColumnType("datetime");
+                entity.Property(e => e.FechaInicio).HasColumnType("datetime");
+
+                entity.Property(e => e.FechaFin).HasColumnType("datetime");
 
                 entity.Property(e => e.HabitacionId).HasColumnType("int(11)");
 
