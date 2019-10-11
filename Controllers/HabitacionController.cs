@@ -33,7 +33,7 @@ namespace Web2Hotel.Controllers
         public async Task<ActionResult<IEnumerable<Habitacion>>> GetHabitacionesLibres(DateTime fechaInicio,DateTime fechaFin)
         {
              /// <summary>
-            /// Condicion de una habitacion libre:
+            /// Condicion de una habitacion libre: Nhibernate
             ///     No tiene reservas entre fecha inicio y fecha fin
             /// </summary>
             var habitacionesLibres = 
